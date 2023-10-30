@@ -17,7 +17,7 @@ class UpdateRecords{
         record1.setId(BigInt("440240983007"));
         /*
          * Call addFieldValue method that takes two arguments
-         * Import the "@zohocrm/nodejs-sdk-2.1/core/com/zoho/crm/api/record/field" file
+         * Import the "@zohocrm/typescript-sdk-5.0/core/com/zoho/crm/api/record/field" file
          * 1 . Call Field "." and choose the module from the displayed list and press "." and choose the field name from the displayed list.
          * 2 . Value
          */
