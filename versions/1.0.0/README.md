@@ -87,6 +87,51 @@ TypeScript SDK is installable through **npm**. **npm** is a tool for dependency 
 - Another method to install the SDK:
     - Add dependencies to the package.json of the node server with the latest version (recommended)
     - Run **npm install** in the directory which installs all the dependencies mentioned in package.json.
+ 
+### Dependencies
+
+- Dependencies that should be included in your project
+
+  - install **form-data**
+    ```sh
+    npm i form-data
+    ```
+  - install **ts-node**
+    ```sh
+    npm i ts-node
+    ```
+  - install **typescript**
+    ```sh
+    npm i typescript
+    ```
+  - install **got**
+    ```sh
+    npm i got
+    ```
+  - install **moment-timezone**
+    ```sh
+    npm i moment-timezone
+    ```
+  - install **mysql**
+    ```sh
+    npm i mysql
+    ```
+  - install **tunnel**
+    ```sh
+    npm i tunnel
+    ```
+  - install **winston**
+    ```sh
+    npm i winston
+    ```
+  - install **@types/mysql**
+    ```sh
+    npm i @types/mysql
+    ```
+  - install **@types/tunnel**
+    ```sh
+    npm i @types/tunnel
+    ```
 
 
 ## Token Persistence
