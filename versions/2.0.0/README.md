@@ -907,181 +907,58 @@ await ZOHOCRMSDK.Initializer.removeUserConfiguration(token);
 ## SDK Sample code
 
 ```js
-import * as path from "path";
-import * as fs from "fs";
 import * as ZOHOCRMSDK from "@zohocrm/typescript-sdk-5.0";
-class GetRecords{
-    static async getRecords(moduleAPIName: string) {
+class CreateRecords{
+    static async createRecords(moduleAPIName: string) {
         let recordOperations : ZOHOCRMSDK.Record.RecordOperations = new ZOHOCRMSDK.Record.RecordOperations();
-        let paramInstance : ZOHOCRMSDK.ParameterMap = new ZOHOCRMSDK.ParameterMap();
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.CVID, "34770610087501");
-        let fieldNames = ["Company", "Email"];
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.FIELDS, fieldNames.toString());
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.PAGE, 1);
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.PER_PAGE, 1);
-        let startDateTime = new Date(2020, 1, 10, 10, 10, 10);
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.STARTDATETIME, startDateTime);
-        let endDateTime = new Date(2020, 7, 10, 12, 12, 12);
-        await paramInstance.add(ZOHOCRMSDK.Record.GetRecordsParam.ENDDATETIME, endDateTime);
+        let request : ZOHOCRMSDK.Record.BodyWrapper = new ZOHOCRMSDK.Record.BodyWrapper();
+        let recordsArray : ZOHOCRMSDK.Record.Record[] = [];
+        let record : ZOHOCRMSDK.Record.Record = new ZOHOCRMSDK.Record.Record();
+        await record.addFieldValue(ZOHOCRMSDK.Record.Field.Leads.LAST_NAME, "Node JS SDK");
+        await record.addFieldValue(ZOHOCRMSDK.Record.Field.Leads.FIRST_NAME, "Node");
+        await record.addFieldValue(ZOHOCRMSDK.Record.Field.Leads.COMPANY, "ZCRM");
+        await record.addFieldValue(ZOHOCRMSDK.Record.Field.Leads.CITY, "City");
+        let tagsArray = [];
+        let tag = new ZOHOCRMSDK.Tags.Tag();
+        tag.setName("Test");
+        tagsArray.push(tag);
+        record.setTag(tagsArray);
+        recordsArray.push(record);
+        request.setData(recordsArray);
         let headerInstance = new ZOHOCRMSDK.HeaderMap();
-        await headerInstance.add(ZOHOCRMSDK.Record.GetRecordsHeader.IF_MODIFIED_SINCE, new Date("2020-01-01T00:00:00+05:30"));
-        let response: ZOHOCRMSDK.APIResponse<ZOHOCRMSDK.Record.ResponseHandler.MasterModel> = await recordOperations.getRecords(moduleAPIName, paramInstance, headerInstance);
+        let response = await recordOperations.createRecords(moduleAPIName, request, headerInstance);
         if (response != null) {
             console.log("Status Code: " + response.getStatusCode());
-            if ([204, 304].includes(response.getStatusCode())) {
-                console.log(response.getStatusCode() == 204 ? "No Content" : "Not Modified");
-                return;
-            }
             let responseObject = response.getObject();
             if (responseObject != null) {
-                if (responseObject instanceof ZOHOCRMSDK.Record.ResponseWrapper) {
-                    let records :  ZOHOCRMSDK.Record.Record[] = responseObject.getData();
-                    records.forEach(record => {
-                        console.log("Record ID: " + record.getId());
-                        let createdBy = record.getCreatedBy();
-                        if (createdBy != null) {
-                            console.log("Record Created By User-ID: " + createdBy.getId());
-                            console.log("Record Created By User-Name: " + createdBy.getName());
-                            console.log("Record Created By User-Email: " + createdBy.getEmail());
-                        }
-                        console.log("Record CreatedTime: " + record.getCreatedTime());
-                        let modifiedBy = record.getModifiedBy();
-                        if (modifiedBy != null) {
-                            console.log("Record Modified By User-ID: " + modifiedBy.getId());
-                            console.log("Record Modified By User-Name: " + modifiedBy.getName());
-                            console.log("Record Modified By User-Email: " + modifiedBy.getEmail());
-                        }
-                        console.log("Record ModifiedTime: " + record.getModifiedTime());
-                        let tags = record.getTag();
-                        if (tags != null) {
-                            tags.forEach(tag => {
-                                console.log("Record Tag Name: " + tag.getName());
-                                console.log("Record Tag ID: " + tag.getId());
-                            });
-                        }
-                        //To get particular field value
-                        console.log("Record Field Value: " + record.getKeyValue("Last_Name"));// FieldApiName
-                        console.log("Record KeyValues: ");
-                        let keyValues = record.getKeyValues();
-                        let keyArray = Array.from(keyValues.keys());
-                        keyArray.forEach(keyName => {
-                            let value = keyValues.get(keyName);
-                            if (value != null) {
-                                if (Array.isArray(value)) {
-                                    if (value.length > 0) {
-                                        else if (value[0] instanceof ZOHOCRMSDK.Choice) {
-                                            let choiceArray = value;
-                                            console.log(keyName);
-                                            console.log("Values");
-                                            choiceArray.forEach(eachChoice => {
-                                                console.log(eachChoice.getValue());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Tags.Tag) {
-                                            let tags1 = value;
-                                            tags1.forEach(tag => {
-                                                console.log("Record Tag Name: " + tag.getName());
-                                                console.log("Record Tag ID: " + tag.getId());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.PricingDetails) {
-                                            let pricingDetails = value;
-                                            pricingDetails.forEach(pricingDetail => {
-                                                console.log("Record PricingDetails ToRange: " + pricingDetail.getToRange().toString());
-                                                console.log("Record PricingDetails Discount: " + pricingDetail.getDiscount().toString());
-                                                console.log("Record PricingDetails ID: " + pricingDetail.getId());
-                                                console.log("Record PricingDetails FromRange: " + pricingDetail.getFromRange().toString());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.Participants) {
-                                            let participants = value;
-                                            participants.forEach(participant => {
-                                                console.log("Record Participants Name: " + participant.getName());
-                                                console.log("Record Participants Invited: " + participant.getInvited().toString());
-                                                console.log("Record Participants ID: " + participant.getId());
-                                                console.log("Record Participants Type: " + participant.getType());
-                                                console.log("Record Participants Participant: " + participant.getParticipant());
-                                                console.log("Record Participants Status: " + participant.getStatus());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.Record) {
-                                            let recordArray = value;
-                                            recordArray.forEach(record1 => {
-                                                Array.from(record1.getKeyValues().keys()).forEach(key => {
-                                                    console.log(key + ": " + record1.getKeyValues().get(key));
-                                                });
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.LineTax) {
-                                            let lineTaxes = value;
-                                            lineTaxes.forEach(lineTax => {
-                                                console.log("Record ProductDetails LineTax Percentage: " + lineTax.getPercentage().toString());
-                                                console.log("Record ProductDetails LineTax Name: " + lineTax.getName());
-                                                console.log("Record ProductDetails LineTax Id: " + lineTax.getId());
-                                                console.log("Record ProductDetails LineTax Value: " + lineTax.getValue().toString());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.Comment) {
-                                            let comments = value;
-                                            comments.forEach(comment => {
-                                                console.log("Record Comment CommentedBy: " + comment.getCommentedBy());
-                                                console.log("Record Comment CommentedTime: " + comment.getCommentedTime().toString());
-                                                console.log("Record Comment CommentContent: " + comment.getCommentContent());
-                                                console.log("Record Comment Id: " + comment.getId());
-                                            });
-                                        }
-                                        else if (value[0] instanceof ZOHOCRMSDK.Record.Reminder) {
-                                            let reminders = value;
-                                            reminders.forEach(reminder => {
-                                                console.log("Reminder Period: " + reminder.getPeriod());
-                                                console.log("Reminder Unit: " + reminder.getUnit());
-                                            });
-                                        }
-                                        else {
-                                            console.log(keyName + ": " + value);
-                                        }
-                                    }
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Users.Users) {
-                                    console.log("Record " + keyName + " User-ID: " + value.getId());
-                                    console.log("Record " + keyName + " User-Name: " + value.getName());
-                                    console.log("Record " + keyName + " User-Email: " + value.getEmail());
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Layouts.Layouts) {
-                                    console.log(keyName + " ID: " + value.getId());
-                                    console.log(keyName + " Name: " + value.getName());
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Record.Record) {
-                                    console.log(keyName + " Record ID: " + value.getId());
-                                    console.log(keyName + " Record Name: " + value.getKeyValue("name"));
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Choice) {
-                                    console.log(keyName + ": " + value.getValue());
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Record.RemindAt) {
-                                    console.log(keyName + ": " + value.getAlarm());
-                                }
-                                else if (value instanceof ZOHOCRMSDK.Record.RecurringActivity) {
-                                    console.log(keyName);
-                                    console.log("RRULE: " + value.getRrule());
-                                }
-                                else if (value instanceof Map) {
-                                    console.log(keyName);
-                                    Array.from(value.keys()).forEach(key => {
-                                        console.log(key + ": " + value.get(key));
-                                    });
-                                }
-                                else {
-                                    console.log(keyName + ": " + value);
-                                }
+                if (responseObject instanceof ZOHOCRMSDK.Record.ActionWrapper) {
+                    let actionResponses = responseObject.getData();
+                    actionResponses.forEach(actionResponse => {
+                        if (actionResponse instanceof ZOHOCRMSDK.Record.SuccessResponse) {
+                            console.log("Status: " + actionResponse.getStatus().getValue());
+                            console.log("Code: " + actionResponse.getCode().getValue());
+                            console.log("Details");
+                            let details = actionResponse.getDetails();
+                            if (details != null) {
+                                Array.from(details.keys()).forEach(key => {
+                                    console.log(key + ": " + details.get(key));
+                                });
                             }
-                        });
+                            console.log("Message: " + actionResponse.getMessage().getValue());
+                        }
+                        else if (actionResponse instanceof ZOHOCRMSDK.Record.APIException) {
+                            console.log("Status: " + actionResponse.getStatus().getValue());
+                            console.log("Code: " + actionResponse.getCode().getValue());
+                            console.log("Details");
+                            let details = actionResponse.getDetails();
+                            if (details != null) {
+                                Array.from(details.keys()).forEach(key => {
+                                    console.log(key + ": " + details.get(key));
+                                });
+                            }
+                            console.log("Message: " + actionResponse.getMessage().getValue());
+                        }
                     });
-                    let info = responseObject.getInfo();
-                    console.log("Record Info PerPage : " + info.getPerPage());
-                    console.log("Record Info Count : " + info.getCount());
-                    console.log("Record Info Page : " + info.getPage());
-                    console.log("Record Info MoreRecords : " + info.getMoreRecords());
                 }
                 else if (responseObject instanceof ZOHOCRMSDK.Record.APIException) {
                     console.log("Status: " + responseObject.getStatus().getValue());
@@ -1101,17 +978,17 @@ class GetRecords{
     static async initializeAndCall()
     {
         let environment: ZOHOCRMSDK.Environment = ZOHOCRMSDK.USDataCenter.PRODUCTION();
-        let token : ZOHOCRMSDK.OAuthToken= (new ZOHOCRMSDK.OAuthBuilder())
-            .clientId("1000.xxxx")
-            .clientSecret("xxxx")
-            .refreshToken("1000.xxxx.xxxx")
+        let token : ZOHOCRMSDK.OAuthToken = new ZOHOCRMSDK.OAuthBuilder()
+            .clientId("client_id")
+            .clientSecret("client_secret")
+            .grantToken("grant_token")
             .build();
         await (await new ZOHOCRMSDK.InitializeBuilder())
             .environment(environment)
             .token(token)
             .initialize();
-        await GetRecords.getRecords("Leads");
+        await CreateRecords.createRecords("Leads");
     }
 }
-GetRecords.initializeAndCall();
+CreateRecords.initializeAndCall();
 ```
